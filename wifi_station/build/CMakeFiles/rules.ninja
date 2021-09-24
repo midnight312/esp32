@@ -20,6 +20,16 @@ rule CUSTOM_COMMAND
 
 
 #############################################
+# Rule for compiling ASM files.
+
+rule ASM_COMPILER__wifi_station.2eelf_
+  depfile = $DEP_FILE
+  deps = gcc
+  command = /home/thanh/.espressif/tools/xtensa-esp32-elf/esp-2021r1-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
+  description = Building ASM object $out
+
+
+#############################################
 # Rule for compiling C files.
 
 rule C_COMPILER__wifi_station.2eelf_

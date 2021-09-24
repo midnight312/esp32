@@ -1,2 +1,2 @@
-idf_component_register(SRCS "station_example_main.c"
+idf_component_register(SRCS "main_app.c" "http_sever_app.c"
                     INCLUDE_DIRS ".")

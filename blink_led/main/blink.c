@@ -11,15 +11,47 @@
 //#include "module.h"
 
 #define LED_PIN 2
+#define BUTTON_PIN 0
 #define TIM_DELAY_LED_MS 1000 
 static const char *TAG = "example";
 
+void(*input_callback)(int);
+
+static void IRAM_ATTR gpio_input_handler (void* arg)
+{
+	int gpio_num = (uint32_t)arg;
+	input_callback(gpio_num); 
+}
+
+void input_set_callback(void * cb)
+{
+	input_callback = cb;
+}
+
+void gpio_event_callback(int pin)
+{
+	if(pin == BUTTON_PIN)
+	{
+		static int x = 0;
+		gpio_set_level(BUTTON_PIN, x);
+		x = 1 - x;
+	}
+}
 
 void app_main(void)
 {
 	//config led
 	gpio_pad_select_gpio(LED_PIN);
 	gpio_set_direction(LED_PIN,GPIO_MODE_OUTPUT);
+	//config button
+	gpio_pad_select_gpio(0);
+	gpio_set_direction(BUTTON_PIN, GPIO_MODE_INPUT);
+	gpio_set_pull_mode(BUTTON_PIN, GPIO_PULLUP_ONLY);
+	gpio_set_intr_type(BUTTON_PIN, GPIO_INTR_POSEDGE);
+	gpio_install_isr_service(0);
+	gpio_isr_handler_add(BUTTON_PIN, gpio_input_handler, (void*)BUTTON_PIN);
+	input_set_callback(gpio_event_callback);
+
 	//config status led
 	uint8_t state_led = 0; 
 	//keyboard
@@ -42,8 +74,8 @@ void app_main(void)
     {
     	//ESP_LOGI(TAG,"Terning led : %s",(state_led == 0) ? "ON" : "OFF");
 		//blink led
-    	state_led = !state_led;
-    	gpio_set_level(LED_PIN,state_led);
+    	//state_led = !state_led;
+    	//gpio_set_level(LED_PIN,state_led);
 
 		//keyboard
 		/*
